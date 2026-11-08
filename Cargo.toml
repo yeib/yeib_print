@@ -1,6 +1,6 @@
 [package]
 name = "yeib_print"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Yeib <contact@yeib.org>"]
 description = "Fast, clean Win32 GDI silent & direct document printing engine for Rust and Tauri on Windows"
@@ -26,6 +26,10 @@ windows = { version = "0.62", features = [
     "Win32_Security",
     "Win32_Storage_Xps",
 ] }
+
+[package.metadata.docs.rs]
+default-target = "x86_64-pc-windows-msvc"
+targets = ["x86_64-pc-windows-msvc"]
 
 [dev-dependencies]
 serde_json = "1"

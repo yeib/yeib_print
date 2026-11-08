@@ -1,9 +1,15 @@
 //! Envío silencioso de páginas a la cola de impresión de Windows vía GDI (`CreateDCW` + `StretchDIBits`).
 
-use crate::devmode::build_custom_devmode;
-use crate::enum_win32::get_default_printer_name;
-use crate::range::{compute_target_rect, decode_page_source, parse_page_range, prepare_page_dib};
-use crate::types::{PrintError, PrintJobResult, PrintJobSpec, Result};
+use crate::range::parse_page_range;
+use crate::types::{PrintJobResult, PrintJobSpec, Result};
+
+#[cfg(target_os = "windows")]
+use crate::{
+    devmode::build_custom_devmode,
+    enum_win32::get_default_printer_name,
+    range::{compute_target_rect, decode_page_source, prepare_page_dib},
+    types::PrintError,
+};
 
 #[cfg(target_os = "windows")]
 use windows::{

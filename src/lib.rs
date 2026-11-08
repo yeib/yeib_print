@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 //! `yeib_print`: Motor nativo de enumeración de impresoras e impresión silenciosa Win32 GDI/Spooler.
 
 pub mod devmode;

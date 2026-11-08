@@ -39,8 +39,11 @@ yeib_print = "0.1"
 
 ### Basic Example
 
-```rust
-use yeib_print::{list_printers, print_page_sources, PrintJobSpec};
+```rust,no_run
+use yeib_print::{
+    list_printers, print_page_sources, PrintColorMode, PrintJobSpec, PrintOrientation,
+    PrintPaperSize, PrintScaleMode,
+};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 1. List installed printers
@@ -54,10 +57,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         printer_name: "Microsoft Print to PDF".to_string(),
         document_title: "Yeib Invoice".to_string(),
         copies: 1,
-        paper_size: "letter".to_string(),
-        orientation: "portrait".to_string(),
-        color_mode: "color".to_string(),
-        scale_mode: "fit".to_string(),
+        paper_size: PrintPaperSize::Letter,
+        orientation: PrintOrientation::Portrait,
+        color_mode: PrintColorMode::Color,
+        scale_mode: PrintScaleMode::Fit,
         ..Default::default()
     };
 
@@ -77,7 +80,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## 🌐 Tauri 2 Command Integration
 
-```rust
+```rust,ignore
 use tauri::command;
 use yeib_print::{list_printers, print_page_sources, PrintJobResult, PrintJobSpec, PrinterInfo};
 
