@@ -2,8 +2,15 @@
 name = "yeib_print"
 version = "0.1.0"
 edition = "2021"
-authors = ["Yeib"]
-description = "Motor nativo de enumeración de impresoras e impresión silenciosa Win32 GDI/Spooler para el Ecosistema Yeib"
+authors = ["Yeib <contact@yeib.org>"]
+description = "Fast, clean Win32 GDI silent & direct document printing engine for Rust and Tauri on Windows"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/yeib/yeib_print"
+homepage = "https://github.com/yeib/yeib_print"
+documentation = "https://docs.rs/yeib_print"
+readme = "README.md"
+keywords = ["print", "windows", "gdi", "tauri", "spooler"]
+categories = ["os::windows-apis", "multimedia"]
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
