@@ -19,7 +19,7 @@ use windows::{
         BITMAPINFOHEADER, BI_RGB, DEVMODEW, DIB_RGB_COLORS, HALFTONE, HDC, HORZRES, SRCCOPY,
         VERTRES,
     },
-    Win32::Storage::Xps::{EndDoc, EndPage, StartDocW, StartPage, DOCINFOW},
+    Win32::Storage::Xps::{AbortDoc, EndDoc, EndPage, StartDocW, StartPage, DOCINFOW},
 };
 
 fn to_wide(s: &str) -> Vec<u16> {
@@ -126,17 +126,24 @@ unsafe fn execute_gdi_job(
     };
 
     for page_idx in order {
-        let (img_w, img_h, bgra) = prepare_page_dib(
+        let (img_w, img_h, bgra) = match prepare_page_dib(
             &raw_pages[page_idx],
             spec.color_mode,
             spec.orientation,
             printer_is_landscape,
-        )?;
+        ) {
+            Ok(data) => data,
+            Err(e) => {
+                let _ = AbortDoc(hdc);
+                return Err(e);
+            }
+        };
+
         let (dst_x, dst_y, dst_w, dst_h) =
             compute_target_rect(img_w, img_h, page_w, page_h, spec.scale_mode);
 
         if StartPage(hdc) <= 0 {
-            let _ = EndDoc(hdc);
+            let _ = AbortDoc(hdc);
             return Err(PrintError::Spooler("Error al iniciar página (StartPage)".into()));
         }
 
@@ -154,7 +161,7 @@ unsafe fn execute_gdi_job(
             ..Default::default()
         };
 
-        let _ = StretchDIBits(
+        let lines = StretchDIBits(
             hdc,
             dst_x,
             dst_y,
@@ -169,8 +176,17 @@ unsafe fn execute_gdi_job(
             DIB_RGB_COLORS,
             SRCCOPY,
         );
+        if lines <= 0 {
+            let _ = AbortDoc(hdc);
+            return Err(PrintError::Spooler(
+                "Error al enviar mapa de bits a la impresora (StretchDIBits)".into(),
+            ));
+        }
 
-        let _ = EndPage(hdc);
+        if EndPage(hdc) <= 0 {
+            let _ = AbortDoc(hdc);
+            return Err(PrintError::Spooler("Error al finalizar página (EndPage)".into()));
+        }
         total_sent += 1;
     }
 
@@ -183,12 +199,8 @@ unsafe fn execute_gdi_job(
 }
 
 #[cfg(not(target_os = "windows"))]
-pub fn print_page_sources(spec: &PrintJobSpec, page_sources: &[String]) -> Result<PrintJobResult> {
-    let selected = parse_page_range(&spec.page_range, page_sources.len())?;
-    let copies = spec.copies.clamp(1, 99);
-    Ok(PrintJobResult {
-        printer_name: spec.printer_name.clone(),
-        pages_printed: selected.len() * (copies as usize),
-        copies,
-    })
+pub fn print_page_sources(spec: &PrintJobSpec, _page_sources: &[String]) -> Result<PrintJobResult> {
+    Err(PrintError::Spooler(
+        "La impresión nativa Win32 GDI solo es compatible con sistemas operativos Windows".into(),
+    ))
 }

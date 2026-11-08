@@ -1,6 +1,6 @@
 [package]
 name = "yeib_print"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Yeib <contact@yeib.org>"]
 description = "Fast, clean Win32 GDI silent & direct document printing engine for Rust and Tauri on Windows"
@@ -11,6 +11,7 @@ documentation = "https://docs.rs/yeib_print"
 readme = "README.md"
 keywords = ["print", "windows", "gdi", "tauri", "spooler"]
 categories = ["os::windows-apis", "multimedia"]
+rust-version = "1.82"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
