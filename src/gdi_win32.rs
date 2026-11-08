@@ -1,5 +1,6 @@
 //! Envío silencioso de páginas a la cola de impresión de Windows vía GDI (`CreateDCW` + `StretchDIBits`).
 
+use crate::devmode::build_custom_devmode;
 use crate::enum_win32::get_default_printer_name;
 use crate::range::{compute_target_rect, decode_page_source, parse_page_range, prepare_page_dib};
 use crate::types::{PrintError, PrintJobResult, PrintJobSpec, Result};
@@ -9,7 +10,8 @@ use windows::{
     core::PCWSTR,
     Win32::Graphics::Gdi::{
         CreateDCW, DeleteDC, GetDeviceCaps, SetStretchBltMode, StretchDIBits, BITMAPINFO,
-        BITMAPINFOHEADER, BI_RGB, DIB_RGB_COLORS, HALFTONE, HDC, HORZRES, SRCCOPY, VERTRES,
+        BITMAPINFOHEADER, BI_RGB, DEVMODEW, DIB_RGB_COLORS, HALFTONE, HDC, HORZRES, SRCCOPY,
+        VERTRES,
     },
     Win32::Storage::Xps::{EndDoc, EndPage, StartDocW, StartPage, DOCINFOW},
 };
@@ -45,11 +47,16 @@ pub fn print_page_sources(spec: &PrintJobSpec, page_sources: &[String]) -> Resul
     unsafe {
         let driver_w = to_wide("WINSPOOL");
         let printer_w = to_wide(&printer_name);
+        let custom_devmode = build_custom_devmode(&printer_w, spec);
+        let p_devmode = custom_devmode
+            .as_ref()
+            .map(|b| b.as_ptr() as *const DEVMODEW);
+
         let hdc: HDC = CreateDCW(
             PCWSTR(driver_w.as_ptr()),
             PCWSTR(printer_w.as_ptr()),
             PCWSTR::null(),
-            None,
+            p_devmode,
         );
         if hdc.is_invalid() {
             return Err(PrintError::PrinterNotFound(printer_name));

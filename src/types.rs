@@ -73,6 +73,18 @@ pub enum PrintScaleMode {
     Fill,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum PrintPaperSize {
+    #[default]
+    Auto,
+    Letter,
+    A4,
+    Legal,
+    A3,
+    A5,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PrintJobSpec {
@@ -85,6 +97,8 @@ pub struct PrintJobSpec {
     pub scale_mode: PrintScaleMode,
     /// Rango 1-based ("", "all", "1-3, 5").
     pub page_range: String,
+    #[serde(default)]
+    pub paper_size: PrintPaperSize,
 }
 
 impl Default for PrintJobSpec {
@@ -98,6 +112,7 @@ impl Default for PrintJobSpec {
             color_mode: PrintColorMode::Color,
             scale_mode: PrintScaleMode::Fit,
             page_range: String::new(),
+            paper_size: PrintPaperSize::Auto,
         }
     }
 }
